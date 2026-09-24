@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Data & indexes (regenerated at runtime)
+data/vector_store/
+data/bm25_index.pkl
+logs/
+experiments/results/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Environment
+.env
+
+# Extracted text (temp files)
+paper_extracted.txt
+extracted_doc.txt
