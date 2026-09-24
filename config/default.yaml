@@ -1,0 +1,104 @@
+# =============================================================================
+# Adaptive Hybrid RAG — Default Configuration
+# =============================================================================
+# All tunable hyperparameters in one place. Override per-experiment by loading
+# a different YAML or passing CLI arguments.
+# =============================================================================
+
+# ---- Ingestion ----
+ingestion:
+  supported_formats:
+    - ".txt"
+    - ".pdf"
+    - ".md"
+  encoding: "utf-8"
+
+# ---- Chunking ----
+chunking:
+  strategy: "sentence"          # "fixed" or "sentence"
+  chunk_size: 1000              # target chunk size in characters (~200-250 tokens, standard for RAG)
+  chunk_overlap: 200            # overlap between consecutive chunks (~20% overlap is standard)
+  min_chunk_size: 100           # discard chunks shorter than this
+
+# ---- Embeddings ----
+embedding:
+  model_name: "BAAI/bge-small-en-v1.5" # Top-tier open-source embedding model for production
+  dimensions: 384
+  batch_size: 64
+  device: "cpu"                 # "cpu", "cuda", "mps"
+  normalize: true
+
+# ---- Indexing / Vector Store ----
+vector_store:
+  provider: "chromadb"          # "chromadb" or "faiss"
+  persist_directory: "data/vector_store"
+  collection_name: "rag_chunks"
+  similarity_metric: "cosine"   # "cosine", "l2", "ip"
+
+# ---- BM25 Index ----
+bm25:
+  persist_path: "data/bm25_index.pkl"
+  tokenizer: "word"             # "word" or "subword"
+  k1: 1.5
+  b: 0.75
+
+# ---- Retrieval ----
+retrieval:
+  sparse_top_k: 30              # BM25 candidates
+  dense_top_k: 30               # Vector search candidates
+  hybrid_top_k: 30              # After RRF fusion
+  rrf_k: 60                     # RRF constant (standard default)
+
+# ---- Reranking ----
+reranking:
+  enabled: true
+  model_name: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  top_k: 5                      # Final contexts sent to LLM
+  batch_size: 32
+
+# ---- LLM / Generation ----
+llm:
+  provider: "ollama"            # "openai", "gemini", "ollama"
+  model_name: "llama3.2"        # Extremely lightweight 3B model (or use llama3.2:1b for even smaller)
+  temperature: 0.0
+  max_tokens: 1024
+  # Provider-specific settings
+  openai:
+    api_key_env: "OPENAI_API_KEY"
+  gemini:
+    api_key_env: "GEMINI_API_KEY"
+    model_name: "gemini-1.5-flash"
+  ollama:
+    base_url: "http://localhost:11434/v1" # OpenAI compatible endpoint for Ollama
+
+# ---- Context Construction ----
+context:
+  max_contexts: 5               # Max chunks in LLM context
+  max_context_tokens: 3000      # Token budget for context
+  dedup_threshold: 0.9          # Cosine sim threshold for dedup
+  ordering: "relevance"         # "relevance" or "document_order"
+
+# ---- Adaptive RAG ----
+adaptive:
+  router_method: "llm"          # "llm" or "classifier"
+  max_hops: 3                   # Max multi-hop iterations
+  confidence_threshold: 0.7     # Below this → needs retrieval
+
+# ---- Evaluation ----
+evaluation:
+  retrieval_k_values: [1, 3, 5, 10, 20]
+  eval_dataset_path: "data/eval/"
+  use_llm_judge: true           # Use LLM for faithfulness/relevance
+
+# ---- Observability ----
+observability:
+  log_dir: "logs/"
+  log_level: "INFO"
+  log_queries: true
+  log_format: "json"            # "json" or "text"
+
+# ---- API ----
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true

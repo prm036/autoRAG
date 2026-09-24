@@ -1,0 +1,65 @@
+[project]
+name = "adaptive-hybrid-rag"
+version = "0.1.0"
+description = "Adaptive Hybrid RAG System for Multi-Hop Question Answering"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+dependencies = [
+    # Embeddings & ML
+    "sentence-transformers>=3.0.0",
+    "torch>=2.0.0",
+    # Vector store
+    "chromadb>=0.5.0",
+    # BM25
+    "rank-bm25>=0.2.2",
+    # LLM clients
+    "openai>=1.30.0",
+    "google-generativeai>=0.7.0",
+    # Config & utilities
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "nltk>=3.8",
+    "tqdm>=4.60",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+api = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+]
+eval = [
+    "rouge-score>=0.1.2",
+    "datasets>=2.18.0",
+    "pandas>=2.0",
+    "matplotlib>=3.8",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4.0",
+]
+all = [
+    "adaptive-hybrid-rag[api,eval,dev]",
+]
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

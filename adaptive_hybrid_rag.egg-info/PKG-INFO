@@ -1,0 +1,135 @@
+Metadata-Version: 2.4
+Name: adaptive-hybrid-rag
+Version: 0.1.0
+Summary: Adaptive Hybrid RAG System for Multi-Hop Question Answering
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: sentence-transformers>=3.0.0
+Requires-Dist: torch>=2.0.0
+Requires-Dist: chromadb>=0.5.0
+Requires-Dist: rank-bm25>=0.2.2
+Requires-Dist: openai>=1.30.0
+Requires-Dist: google-generativeai>=0.7.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: pydantic>=2.0
+Requires-Dist: nltk>=3.8
+Requires-Dist: tqdm>=4.60
+Requires-Dist: numpy>=1.24
+Provides-Extra: api
+Requires-Dist: fastapi>=0.111.0; extra == "api"
+Requires-Dist: uvicorn[standard]>=0.30.0; extra == "api"
+Provides-Extra: eval
+Requires-Dist: rouge-score>=0.1.2; extra == "eval"
+Requires-Dist: datasets>=2.18.0; extra == "eval"
+Requires-Dist: pandas>=2.0; extra == "eval"
+Requires-Dist: matplotlib>=3.8; extra == "eval"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23; extra == "dev"
+Requires-Dist: ruff>=0.4.0; extra == "dev"
+Provides-Extra: all
+Requires-Dist: adaptive-hybrid-rag[api,dev,eval]; extra == "all"
+
+# Adaptive Hybrid RAG for Multi-Hop Question Answering
+
+An end-to-end Adaptive Retrieval-Augmented Generation system with hybrid sparse/dense retrieval, cross-encoder reranking, multi-hop retrieval, and systematic evaluation.
+
+## Architecture
+
+```
+Documents → Parsing/Cleaning → Chunking → Embeddings → Vector Index + BM25 Index
+    → Hybrid Retrieval (RRF) → Cross-Encoder Reranking → Context Selection → LLM Generation
+```
+
+The **Adaptive RAG controller** examines each query and routes it to:
+- **Direct LLM** — for simple questions answerable from general knowledge
+- **Single-hop RAG** — retrieve once → rerank → generate
+- **Multi-hop RAG** — decompose → iterate (retrieve → reason) → synthesize
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+pip install -e ".[all]"
+```
+
+### 2. Set API Keys
+
+```bash
+export OPENAI_API_KEY=your-key-here
+# OR
+export GEMINI_API_KEY=your-key-here
+```
+
+### 3. Ingest Documents
+
+Place your documents in `data/raw/`, then:
+
+```bash
+curl -X POST http://localhost:8000/ingest \
+  -H "Content-Type: application/json" \
+  -d '{"directory": "data/raw/"}'
+```
+
+### 4. Start the API
+
+```bash
+uvicorn src.api.app:app --reload
+```
+
+### 5. Query
+
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is retrieval-augmented generation?"}'
+```
+
+## Project Structure
+
+```
+src/
+├── ingestion/          # Document parsing, cleaning, chunking
+├── embeddings/         # Embedding model wrapper
+├── indexing/           # Vector store (ChromaDB) + BM25 index
+├── retrieval/          # Dense, sparse, hybrid (RRF), reranker
+├── generation/         # LLM client, context builder, prompts
+├── adaptive/           # Query router, single-hop, multi-hop pipelines
+├── evaluation/         # Retrieval, generation, and system metrics
+├── observability/      # Structured query logging
+└── api/                # FastAPI serving layer
+```
+
+## Docker
+
+```bash
+docker-compose up --build
+```
+
+## Configuration
+
+All hyperparameters are in `config/default.yaml`:
+- Chunking strategy and size
+- Embedding model
+- Retrieval top-K values and RRF constant
+- Cross-encoder reranking model
+- LLM provider and model
+- Adaptive routing parameters
+
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
+| Sparse Retrieval | BM25 (rank_bm25) |
+| Vector Store | ChromaDB |
+| Reranking | Cross-encoder (ms-marco-MiniLM-L-6-v2) |
+| LLM | OpenAI / Gemini / Ollama |
+| API | FastAPI |
+| Containerization | Docker |
+
+## License
+
+MIT

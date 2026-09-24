@@ -1,0 +1,22 @@
+[
+  {
+    "query": "Who is the CEO of NexGen Tech?",
+    "answer": "Sarah Jenkins",
+    "type": "single_hop"
+  },
+  {
+    "query": "Who founded QuantumFlow Innovations?",
+    "answer": "Dr. Aris Thorne and Dr. Elena Rostova",
+    "type": "single_hop"
+  },
+  {
+    "query": "Who is the CEO of the company that acquired QuantumFlow Innovations?",
+    "answer": "Sarah Jenkins",
+    "type": "multi_hop"
+  },
+  {
+    "query": "Where is the headquarters of the company that bought Dr. Aris Thorne's startup?",
+    "answer": "Austin, Texas",
+    "type": "multi_hop"
+  }
+]
